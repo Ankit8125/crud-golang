@@ -2,8 +2,11 @@ package sqlite
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/ankit8125/crud-golang-practice/internal/config"
+	"github.com/ankit8125/crud-golang-practice/internal/types"
+
 	// "github.com/ankit8125/crud-golang-practice/internal/storage"
 	_ "github.com/mattn/go-sqlite3" // This is being used indirectly, that's why we use '_'
 )
@@ -56,4 +59,23 @@ func (s *Sqlite) CreateStudent(name string, email string, age int) (int64, error
 	}
 
 	return lastId, nil
+}
+
+func (s *Sqlite) GetStudentById(id int64) (types.Student, error){
+	stmt, err := s.Db.Prepare("SELECT * FROM students WHERE Id = ? LIMIT 1")
+	if err != nil {
+		return types.Student{}, err
+	}
+	defer stmt.Close()
+
+	var student types.Student
+
+	stmt.QueryRow(id).Scan(&student.Id, &student.Name, &student.Email, &student.Age)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return types.Student{}, fmt.Errorf("no student found with id %s", fmt.Sprint(id))
+		}
+		return types.Student{}, fmt.Errorf("query error: %w", err)
+	}
+	return student, nil
 }
