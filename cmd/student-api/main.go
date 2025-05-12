@@ -1,5 +1,5 @@
 package main
-
+// How to run? => go run cmd/student-api/main.go -config config/local.yaml
 import (
 	"context"
 	"fmt"
@@ -34,6 +34,7 @@ func main(){
 	router := http.NewServeMux()
 	router.HandleFunc("POST /api/students", student.New(storage))
 	router.HandleFunc("GET /api/students/{id}", student.GetById(storage))
+	router.HandleFunc("GET /api/students", student.GetList(storage))
 
 	// setup server
 	server := http.Server{
